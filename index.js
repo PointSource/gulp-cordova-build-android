@@ -74,21 +74,23 @@ module.exports = function(options) {
             var base = path.join(androidPath, 'build/outputs/apk'),
                 cwd = process.env.PWD;
             
-            // Iterate over the output directory
-            fs.readdirSync(base).forEach(function(file) {
-                // Check if the file ends with .apk
-                if(~file.indexOf('.apk')) {
-                    var filePath = path.join(base, file);
+            var filePath;
+            if (release) {
+                if (sign)
+                    filePath = path.join(base, 'android-release.apk');
+                else
+                    filePath = path.join(base, 'android-release-unsigned.apk');
+            } else {
+                filePath = path.join(base, 'android-debug.apk');
+            }
                     
                     // Push the file to the result set
                     self.push(new gutil.File({
                         base: base,
                         cwd: cwd,
                         path: filePath,
-                        contents: fs.readFileSync(path.join(base, file))
+                contents: fs.readFileSync(filePath)
                     }));
-                }
-            });
 
             cb();
         }).catch(function(err) {
