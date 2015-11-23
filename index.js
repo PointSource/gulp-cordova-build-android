@@ -61,11 +61,11 @@ module.exports = function(options) {
                 fs.writeFileSync(path.join(androidPath, 'release-signing.properties'), data.join(os.EOL));
             }
         }).then(function() {
-            var options = [];
+            var options = {};
 
             if(release) {
                 // If the user wants to build for release, add the option
-                options.push('--release');
+                options.release = true;
             }
 
             // Build the platform
