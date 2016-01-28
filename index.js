@@ -30,8 +30,8 @@ module.exports = function(options) {
     }, function(cb) {
         var self = this,
             androidPath = path.join(cordovaLib.findProjectRoot(), 'platforms', 'android'),
-            sign = options.storeFile && options.keyAlias,
-            release = options.release || sign;
+            sign = !!(options.storeFile && options.keyAlias),
+            release = options.release;
 
         Q.fcall(function() {
             return fs.existsSync(androidPath);
@@ -56,24 +56,21 @@ module.exports = function(options) {
                 if(options.storeType) {
                     data.push('storeType=' + options.storeType);
                 }
-                
+
                 // Write the release-signing.properties file
                 fs.writeFileSync(path.join(androidPath, 'release-signing.properties'), data.join(os.EOL));
             }
         }).then(function() {
             var options = {};
 
-            if(release) {
-                // If the user wants to build for release, add the option
-                options.release = true;
-            }
+            options.release = release;
 
             // Build the platform
             return cordova.build({platforms: ['android'], options: options});
         }).then(function() {
             var base = path.join(androidPath, 'build/outputs/apk'),
                 cwd = process.env.PWD;
-            
+
             var filePath;
             if (release) {
                 if (sign)
@@ -83,7 +80,7 @@ module.exports = function(options) {
             } else {
                 filePath = path.join(base, 'android-debug.apk');
             }
-                    
+
                     // Push the file to the result set
                     self.push(new gutil.File({
                         base: base,
